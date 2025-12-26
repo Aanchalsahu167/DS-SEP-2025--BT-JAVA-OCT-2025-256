@@ -1,12 +1,12 @@
 package com.aanchal.trip_management_system.controller;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.springframework.data.domain.Page; 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.DeleteMapping; // Rest of the imports using wildcard
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,9 +21,11 @@ import com.aanchal.trip_management_system.model.TripStatus;
 import com.aanchal.trip_management_system.model.TripSummaryDTO;
 import com.aanchal.trip_management_system.service.TripService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/trips")
-public class TripController { // <-- Ensure this class declaration is correct
+public class TripController {
 
     private final TripService tripService;
 
@@ -33,29 +35,39 @@ public class TripController { // <-- Ensure this class declaration is correct
 
     // 1. Create Trip (POST /api/trips)
     @PostMapping
-    public ResponseEntity<Trip> createTrip(@RequestBody Trip trip) {
-        try {
-            Trip createdTrip = tripService.createTrip(trip);
-            return new ResponseEntity<>(createdTrip, HttpStatus.CREATED);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<Trip> createTrip(@Valid @RequestBody Trip trip) {
+        Trip savedTrip = tripService.createTrip(trip);
+        return new ResponseEntity<>(savedTrip, HttpStatus.CREATED);
     }
 
-    // 2. Get Trip by ID (GET /api/trips/{id})
+    // 2. GET All Trips with Pagination & Sorting (GET /api/trips)
+    // Fix: Method Signature को तीन Parameters (int, int, String) के साथ ठीक किया गया।
+    @GetMapping 
+    public ResponseEntity<Page<Trip>> getAllTrips(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy) {
+
+        // Service method कॉल तीन Parameters के साथ (जो TripService से मेल खाता है)
+        Page<Trip> tripPage = tripService.getAllTripsPaginated(page, size, sortBy);
+        
+        return new ResponseEntity<>(tripPage, HttpStatus.OK);
+    }
+
+    // 3. Get Trip by ID (GET /api/trips/{id})
     @GetMapping("/{id}")
     public ResponseEntity<Trip> getTripById(@PathVariable Integer id) {
         try {
-            Trip trip = tripService.getTripById(id);
-            return new ResponseEntity<>(trip, HttpStatus.OK);
+             Trip trip = tripService.getTripById(id);
+             return new ResponseEntity<>(trip, HttpStatus.OK);
         } catch (NoSuchElementException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-    
-    // 3. Update Trip (PUT /api/trips/{id})
+
+    // 4. Update Trip (PUT /api/trips/{id})
     @PutMapping("/{id}")
-    public ResponseEntity<Trip> updateTrip(@PathVariable Integer id, @RequestBody Trip tripDetails) {
+    public ResponseEntity<Trip> updateTrip(@PathVariable Integer id, @Valid @RequestBody Trip tripDetails) {
         try {
             Trip updatedTrip = tripService.updateTrip(id, tripDetails);
             return new ResponseEntity<>(updatedTrip, HttpStatus.OK);
@@ -66,46 +78,26 @@ public class TripController { // <-- Ensure this class declaration is correct
         }
     }
 
-    // 4. Delete Trip (DELETE /api/trips/{id})
+    // 5. Delete Trip (DELETE /api/trips/{id})
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTrip(@PathVariable Integer id) {
         tripService.deleteTrip(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-    
-    // 5. Get All Trips (GET /api/trips)
-    @GetMapping
-    public ResponseEntity<List<Trip>> getAllTrips() {
-        List<Trip> trips = tripService.getAllTrips();
-        return new ResponseEntity<>(trips, HttpStatus.OK);
-    }
 
     // 6. Search and Sort (GET /api/trips/search)
     @GetMapping("/search")
     public ResponseEntity<List<Trip>> searchTrips(
-            @RequestParam String destination, 
-            @RequestParam TripStatus status, 
+            @RequestParam String destination,
+            @RequestParam TripStatus status,
             @RequestParam(defaultValue = "startDate") String sortBy,
             @RequestParam(defaultValue = "ASC") String sortDirection) {
-        
+
         List<Trip> trips = tripService.searchAndSortTrips(destination, status, sortBy, sortDirection);
         return new ResponseEntity<>(trips, HttpStatus.OK);
     }
-
-    // 7. Find Trips Between Dates (GET /api/trips/dates)
-    @GetMapping("/dates")
-    public ResponseEntity<List<Trip>> getTripsBetweenDates(
-            @RequestParam LocalDate startDate,
-            @RequestParam LocalDate endDate) {
-        try {
-            List<Trip> trips = tripService.getTripsBetweenDates(startDate, endDate);
-            return new ResponseEntity<>(trips, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
-    
-    // 8. Get Trip Summary (GET /api/trips/summary)
+      
+    // 7. Get Trip Summary (GET /api/trips/summary)
     @GetMapping("/summary")
     public ResponseEntity<TripSummaryDTO> getTripSummary() {
         TripSummaryDTO summary = tripService.getTripSummary();

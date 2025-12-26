@@ -8,9 +8,17 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 
 @Entity
 public class Trip {
+
+    @NotBlank(message = "Trip name is required")
+    private String name;
+
+    @Positive(message = "Price must be positive")
+    private double price;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,13 +27,13 @@ public class Trip {
     private String destination;
     private LocalDate startDate;
     private LocalDate endDate;
-    private Double price;
 
     @Enumerated(EnumType.STRING)
     private TripStatus status;
 
     // Default Constructor (JPA ke liye zaroori)
-    public Trip() {}
+    public Trip() {
+    }
 
     // Constructor for Tests and Service Layer (Iska hona zaroori hai!)
     public Trip(Integer id, String destination, LocalDate startDate, LocalDate endDate, Double price, TripStatus status) {
@@ -36,18 +44,61 @@ public class Trip {
         this.price = price;
         this.status = status;
     }
-    
+
     // Getters and Setters (Agar ye code mein missing the toh copy karein)
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
-    public String getDestination() { return destination; }
-    public void setDestination(String destination) { this.destination = destination; }
-    public LocalDate getStartDate() { return startDate; }
-    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
-    public LocalDate getEndDate() { return endDate; }
-    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
-    public TripStatus getStatus() { return status; }
-    public void setStatus(TripStatus status) { this.status = status; }
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getDestination() {
+        return destination;
+    }
+
+    public void setDestination(String destination) {
+        this.destination = destination;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    public TripStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TripStatus status) {
+        this.status = status;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

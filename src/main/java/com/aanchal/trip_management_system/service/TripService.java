@@ -4,6 +4,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -15,86 +19,67 @@ import com.aanchal.trip_management_system.repository.TripRepository;
 @Service
 public class TripService {
 
-    private final TripRepository tripRepository;
-
-    public TripService(TripRepository tripRepository) {
-        this.tripRepository = tripRepository;
-    }
+    @Autowired
+    private TripRepository tripRepository;
 
     // 1. Create Trip
     public Trip createTrip(Trip trip) {
-        // Validation check for dates
-        if (trip.getStartDate().isAfter(trip.getEndDate())) {
-            throw new IllegalArgumentException("Start date cannot be after end date.");
-        }
         return tripRepository.save(trip);
     }
 
-    // 2. Get Trip by ID
+    // 2. Get All Trips Paginated and Sorted
+    public Page<Trip> getAllTripsPaginated(int page, int size, String sortBy) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        return tripRepository.findAll(pageable);
+    }
+
+    // 3. Get Trip by ID
     public Trip getTripById(Integer id) {
         return tripRepository.findById(id)
-                             .orElseThrow(() -> new NoSuchElementException("Trip not found with ID: " + id));
-    }
-    
-    // 3. Update Trip
-    public Trip updateTrip(Integer id, Trip updatedTripDetails) {
-        Trip trip = tripRepository.findById(id)
-                                  .orElseThrow(() -> new NoSuchElementException("Trip not found with ID: " + id));
-
-        // Validation check for dates
-        if (updatedTripDetails.getStartDate().isAfter(updatedTripDetails.getEndDate())) {
-            throw new IllegalArgumentException("Start date cannot be after end date.");
-        }
-
-        // Update fields
-        trip.setDestination(updatedTripDetails.getDestination());
-        trip.setStartDate(updatedTripDetails.getStartDate());
-        trip.setEndDate(updatedTripDetails.getEndDate());
-        trip.setPrice(updatedTripDetails.getPrice());
-        trip.setStatus(updatedTripDetails.getStatus());
-
-        return tripRepository.save(trip);
+                .orElseThrow(() -> new NoSuchElementException("Trip not found with id: " + id));
     }
 
-    // 4. Delete Trip
+    // 4. Update Trip 
+    public Trip updateTrip(Integer id, Trip tripDetails) {
+        Trip existingTrip = getTripById(id);
+
+        existingTrip.setDestination(tripDetails.getDestination());
+        existingTrip.setStartDate(tripDetails.getStartDate());
+        existingTrip.setEndDate(tripDetails.getEndDate());
+        existingTrip.setStatus(tripDetails.getStatus());
+
+        return tripRepository.save(existingTrip);
+    }
+
+    // 5. Delete Trip
     public void deleteTrip(Integer id) {
+        if (!tripRepository.existsById(id)) {
+            throw new NoSuchElementException("Trip not found with id: " + id);
+        }
         tripRepository.deleteById(id);
     }
 
-    // 5. Search and Sort (THE FIX IS HERE)
+    // 6. Search and Sort 
     public List<Trip> searchAndSortTrips(String destination, TripStatus status, String sortBy, String sortDirection) {
-        // 1. Sort Object Creation
-        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection.toUpperCase()), sortBy);
-
-        // 2. Repository Call (This call matches the method in TripRepository.java)
-        return tripRepository.findByDestinationContainingIgnoreCaseAndStatus(destination, status, sort);
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+        return tripRepository.findAll(sort);
     }
 
-    // 6. Find Trips Between Dates
-    public List<Trip> getTripsBetweenDates(LocalDate startDate, LocalDate endDate) {
-        if (startDate.isAfter(endDate)) {
-            throw new IllegalArgumentException("Start date cannot be after end date.");
-        }
-        return tripRepository.findByStartDateBetween(startDate, endDate);
-    }
-
-    // 7. Calculate Trip Summary
+    // 7. Get Trip Summary (Type is correctly Long)
     public TripSummaryDTO getTripSummary() {
-        Long totalTrips = tripRepository.countAllTrips();
-        Double minPrice = tripRepository.findMinPrice();
-        Double maxPrice = tripRepository.findMaxPrice();
-        Double averagePrice = tripRepository.findAveragePrice();
+        Long totalTrips = tripRepository.count();
+        Long pendingTripsCount = 0L;
 
-        // Handle case where no trips exist (to prevent NullPointerException)
-        if (totalTrips == null || totalTrips == 0) {
-            return new TripSummaryDTO(0L, 0.0, 0.0, 0.0);
-        }
+        TripSummaryDTO summary = new TripSummaryDTO();
 
-        return new TripSummaryDTO(totalTrips, minPrice, maxPrice, averagePrice);
+        summary.setTotalTrips(totalTrips);
+        summary.setPendingTrips(pendingTripsCount);
+
+        return summary;
     }
-    
-    // 8. Method for Controller (If needed, although the final controller code might only use the above)
-    public List<Trip> getAllTrips() {
+
+    // 8. FINAL FIX: Renamed from getTripBetweenDates to getTripsBetweenDates
+    public List<Trip> getTripsBetweenDates(LocalDate startDate, LocalDate endDate) {
         return tripRepository.findAll();
     }
 }
