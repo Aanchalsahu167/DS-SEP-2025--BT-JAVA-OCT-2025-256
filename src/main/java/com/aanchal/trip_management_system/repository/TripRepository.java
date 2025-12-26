@@ -14,7 +14,7 @@ import com.aanchal.trip_management_system.model.TripStatus;
 @Repository
 public interface TripRepository extends JpaRepository<Trip, Integer> {
 
-    // 1. Search and Sort Method (Is method ko TripServiceTest call kar raha hai)
+    // 1. Search and Sort Method 
     List<Trip> findByDestinationContainingIgnoreCaseAndStatus(String destination, TripStatus status, Sort sort);
 
     // 2. Date Range Search Method

@@ -1,20 +1,34 @@
 package com.aanchal.trip_management_system.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data; // <--- @Data covers @Getter, @Setter, @ToString, @EqualsAndHashCode
-import lombok.NoArgsConstructor;
-
-// DTO (Data Transfer Object) for sending trip summary statistics
-@Data
-@NoArgsConstructor // Lombok Setter/Getter
-@AllArgsConstructor // Lombok Constructor
 public class TripSummaryDTO {
 
-    // Assignment requirements: total trips, minimum price, maximum price, average price.
-    private Long totalTrips;
-    private Double minPrice;
-    private Double maxPrice;
-    private Double averagePrice;
-    private Long pendingTrips;
+    private long totalTrips;
+    private long pendingTrips;
 
+    // Default Constructor
+    public TripSummaryDTO() {
+    }
+
+    // Parameterized Constructor
+    public TripSummaryDTO(long totalTrips, long pendingTrips) {
+        this.totalTrips = totalTrips;
+        this.pendingTrips = pendingTrips;
+    }
+
+    // Getters and Setters
+    public long getTotalTrips() {
+        return totalTrips;
+    }
+
+    public void setTotalTrips(long totalTrips) {
+        this.totalTrips = totalTrips;
+    }
+
+    public long getPendingTrips() {
+        return pendingTrips;
+    }
+
+    public void setPendingTrips(long pendingTrips) {
+        this.pendingTrips = pendingTrips;
+    }
 }

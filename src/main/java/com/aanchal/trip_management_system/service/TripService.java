@@ -67,15 +67,11 @@ public class TripService {
 
     // 7. Get Trip Summary (Type is correctly Long)
     public TripSummaryDTO getTripSummary() {
-        Long totalTrips = tripRepository.count();
-        Long pendingTripsCount = 0L;
+        long totalTrips = tripRepository.count();
+        long pendingTripsCount = 0L;
 
-        TripSummaryDTO summary = new TripSummaryDTO();
+        return new TripSummaryDTO(totalTrips, pendingTripsCount);
 
-        summary.setTotalTrips(totalTrips);
-        summary.setPendingTrips(pendingTripsCount);
-
-        return summary;
     }
 
     // 8. FINAL FIX: Renamed from getTripBetweenDates to getTripsBetweenDates

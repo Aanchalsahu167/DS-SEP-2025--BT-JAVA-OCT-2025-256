@@ -3,7 +3,7 @@ package com.aanchal.trip_management_system.controller;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.springframework.data.domain.Page; 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping; // Rest of the imports using wildcard
@@ -41,16 +41,14 @@ public class TripController {
     }
 
     // 2. GET All Trips with Pagination & Sorting (GET /api/trips)
-    // Fix: Method Signature को तीन Parameters (int, int, String) के साथ ठीक किया गया।
-    @GetMapping 
+    @GetMapping
     public ResponseEntity<Page<Trip>> getAllTrips(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy) {
 
-        // Service method कॉल तीन Parameters के साथ (जो TripService से मेल खाता है)
         Page<Trip> tripPage = tripService.getAllTripsPaginated(page, size, sortBy);
-        
+
         return new ResponseEntity<>(tripPage, HttpStatus.OK);
     }
 
@@ -58,10 +56,10 @@ public class TripController {
     @GetMapping("/{id}")
     public ResponseEntity<Trip> getTripById(@PathVariable Integer id) {
         try {
-             Trip trip = tripService.getTripById(id);
-             return new ResponseEntity<>(trip, HttpStatus.OK);
+            Trip trip = tripService.getTripById(id);
+            return new ResponseEntity<>(trip, HttpStatus.OK);
         } catch (NoSuchElementException e) {
-             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -96,7 +94,7 @@ public class TripController {
         List<Trip> trips = tripService.searchAndSortTrips(destination, status, sortBy, sortDirection);
         return new ResponseEntity<>(trips, HttpStatus.OK);
     }
-      
+
     // 7. Get Trip Summary (GET /api/trips/summary)
     @GetMapping("/summary")
     public ResponseEntity<TripSummaryDTO> getTripSummary() {
