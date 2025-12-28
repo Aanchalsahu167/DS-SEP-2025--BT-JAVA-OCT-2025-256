@@ -31,11 +31,11 @@ public class Trip {
     @Enumerated(EnumType.STRING)
     private TripStatus status;
 
-    // Default Constructor (JPA ke liye zaroori)
+    // Default Constructor 
     public Trip() {
     }
 
-    // Constructor for Tests and Service Layer (Iska hona zaroori hai!)
+    // Constructor for Tests and Service Layer 
     public Trip(Integer id, String destination, LocalDate startDate, LocalDate endDate, Double price, TripStatus status) {
         this.id = id;
         this.destination = destination;
@@ -45,7 +45,7 @@ public class Trip {
         this.status = status;
     }
 
-    // Getters and Setters (Agar ye code mein missing the toh copy karein)
+    // Getters and Setters 
     public Integer getId() {
         return id;
     }

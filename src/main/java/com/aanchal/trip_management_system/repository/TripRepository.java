@@ -14,6 +14,8 @@ import com.aanchal.trip_management_system.model.TripStatus;
 @Repository
 public interface TripRepository extends JpaRepository<Trip, Integer> {
 
+    List<Trip> findByNameContainingIgnoreCaseOrDestinationContainingIgnoreCase(String name, String destination);
+
     // 1. Search and Sort Method 
     List<Trip> findByDestinationContainingIgnoreCaseAndStatus(String destination, TripStatus status, Sort sort);
 
@@ -32,4 +34,5 @@ public interface TripRepository extends JpaRepository<Trip, Integer> {
 
     @Query("SELECT AVG(t.price) FROM Trip t")
     Double findAveragePrice();
+
 }
